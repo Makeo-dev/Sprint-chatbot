@@ -1,0 +1,67 @@
+<!-- Paste this just before </body> on any page. Change API_URL to your deployed server. -->
+<style>
+  #dgep-btn { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%;
+    border: 0; background: #1a4d8f; color: #fff; font-size: 24px; cursor: pointer; z-index: 9999; }
+  #dgep-box { position: fixed; bottom: 90px; right: 20px; width: min(340px, calc(100vw - 40px)); height: 420px;
+    background: #fff; border: 1px solid #ccc; border-radius: 12px; display: none; flex-direction: column;
+    z-index: 9999; font-family: system-ui, sans-serif; }
+  #dgep-log { flex: 1; overflow-y: auto; padding: 10px; font-size: 14px; }
+  .dgep-me, .dgep-bot { margin: 6px 0; padding: 8px 10px; border-radius: 10px; max-width: 85%; }
+  .dgep-me { background: #1a4d8f; color: #fff; margin-left: auto; }
+  .dgep-bot { background: #eee; color: #111; }
+  #dgep-form { display: flex; border-top: 1px solid #ccc; }
+  #dgep-input { flex: 1; border: 0; padding: 10px; font-size: 14px; outline: none; }
+  #dgep-send { border: 0; background: none; padding: 0 12px; cursor: pointer; font-size: 14px; }
+</style>
+
+<button id="dgep-btn" aria-label="Open guest assistant">💬</button>
+<div id="dgep-box">
+  <div id="dgep-log"></div>
+  <div id="dgep-form">
+    <input id="dgep-input" maxlength="500" placeholder="Ask about checkout, wifi, breakfast..." />
+    <button id="dgep-send">Send</button>
+  </div>
+</div>
+
+<script>
+  const API_URL = "http://localhost:8000";   // CHANGE to your deployed server address
+  const box = document.getElementById("dgep-box");
+  const log = document.getElementById("dgep-log");
+  const input = document.getElementById("dgep-input");
+  let history = [];                          // remembers the last few turns
+
+  function addLine(text, cls) {
+    const div = document.createElement("div");
+    div.className = cls;
+    div.textContent = text;                  // textContent (not innerHTML) so replies cannot inject HTML
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    addLine(text, "dgep-me");
+    try {
+      const res = await fetch(API_URL + "/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history: history.slice(-6) }),
+      });
+      const data = await res.json();
+      const reply = data.reply || "Sorry, something went wrong. Please contact reception.";
+      addLine(reply, "dgep-bot");
+      history.push({ role: "user", content: text }, { role: "assistant", content: reply });
+    } catch (e) {
+      addLine("Cannot reach the assistant. Please contact reception.", "dgep-bot");
+    }
+  }
+
+  document.getElementById("dgep-btn").onclick = () => {
+    box.style.display = box.style.display === "flex" ? "none" : "flex";
+    if (!log.children.length) addLine("Hi! Ask me about check-in, breakfast, wifi or payments.", "dgep-bot");
+  };
+  document.getElementById("dgep-send").onclick = send;
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+</script>

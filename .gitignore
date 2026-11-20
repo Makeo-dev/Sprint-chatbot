@@ -1,0 +1,4 @@
+sprint/
+__pycache__/
+.env
+*.pyc
