@@ -87,3 +87,13 @@ Open `http://localhost:3000/widget.html` in your browser to test the assistant. 
 - The free Render server sleeps after about 15 minutes idle, so the first reply can take 30 to 50 seconds.
 - The Gemini free tier has a shared rate limit, so heavy testing can trigger the fallback message.
 - Demo only. Never send real guest data.
+
+## Restarting After a Shutdown
+The local servers stop when the computer shuts down or restarts. The live bot on Render keeps running.
+To use your local copy again:
+1. Open a terminal in the project folder and activate the environment:
+   Set-ExecutionPolicy -Scope Process RemoteSigned
+   .\sprint\Scripts\Activate.ps1
+2. Terminal 1: uvicorn train:app --reload --port 8000
+3. Terminal 2: python -m http.server 3000
+The key loads automatically from the .env file.
