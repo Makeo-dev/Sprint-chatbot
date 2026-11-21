@@ -16,7 +16,7 @@ FAQ_TEXT = Path(__file__).with_name("faq.txt").read_text(encoding="utf-8")
 
 # 2. Settings come from environment variables so no secret lives in the code.
 #    Check Google AI Studio for which model has free-tier limits, then change CHAT_MODEL if needed.
-MODEL = os.getenv("CHAT_MODEL", "gemini-3.5-flash")
+MODEL = os.getenv("CHAT_MODEL", "gemini-3.5-flash-lite")
 # One or more website addresses allowed to call this server, separated by commas.
 # Example: ALLOWED_ORIGIN="https://myhotel.vercel.app,http://localhost:5173"
 ALLOWED_ORIGINS = [o.strip().rstrip("/") for o in os.getenv("ALLOWED_ORIGIN", "http://localhost:3000").split(",")]
